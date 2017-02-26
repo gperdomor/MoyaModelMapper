@@ -1,11 +1,11 @@
 Pod::Spec.new do |s|
   s.name         = "MoyaModelMapper"
   s.version      = "1.0.0"
-  s.summary      = "ModelMapper bindings for Moya"
+  s.summary      = "ModelMapper bindings for Moya. Includes RxSwift and ReactiveSwift bindings as well."
   s.description  = <<-DESC
-    [ModelMapper](https://github.com/lyft/mapper) bindings for 
-    [Moya](https://github.com/Moya/Moya) for easier JSON serialization. Includes
-    [RxSwift](https://github.com/ReactiveX/RxSwift) and [ReactiveSwift](https://github.com/ReactiveCocoa/ReactiveSwift) bindings as well.
+    [ModelMapper](https://github.com/lyft/mapper) bindings for
+    [Moya](https://github.com/Moya/Moya) for easier JSON serialization.
+    Includes [RxSwift](https://github.com/ReactiveX/RxSwift) and [ReactiveSwift](https://github.com/ReactiveCocoa/ReactiveSwift) bindings as well.
     Instructions on how to use it are in
     [the README](https://github.com/gperdomor/MoyaModelMapper).
   DESC
@@ -26,22 +26,22 @@ Pod::Spec.new do |s|
 
   s.subspec "Core" do |ss|
     ss.source_files  = "Sources/MoyaModelMapper/*.swift"
-    ss.dependency "Moya", "~> 8.0.0"
-    ss.dependency "ModelMapper"
+    ss.dependency "Moya", "~> 8.0"
+    ss.dependency "ModelMapper", "~> 6.0"
     ss.framework = "Foundation"
   end
 
   s.subspec "RxSwift" do |ss|
     ss.source_files = "Sources/RxMoyaModelMapper/*.swift"
-    ss.dependency "Moya/RxSwift", "~> 8.0.0"
     ss.dependency "MoyaModelMapper/Core"
-    ss.dependency "RxSwift"
+    ss.dependency "Moya/RxSwift"
+    ss.dependency "RxSwift", "~> 3.2"
   end
 
   s.subspec "ReactiveSwift" do |ss|
     ss.source_files = "Sources/ReactiveMoyaModelMapper/*.swift"
-    ss.dependency "Moya/ReactiveCocoa", "~> 8.0.0"
     ss.dependency "MoyaModelMapper/Core"
-    ss.dependency "ReactiveSwift"
+    ss.dependency "Moya/ReactiveCocoa"
+    ss.dependency "ReactiveSwift", "~> 1.0"
   end
 end
