@@ -32,7 +32,7 @@ class Issue: Mappable {
     let number: Int
     let title: String
     let body: String
-    
+
     required init(map: Mapper) throws {
         try identifier = map.from("id")
         try number = map.from("number")
