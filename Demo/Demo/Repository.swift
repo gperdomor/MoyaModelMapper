@@ -32,7 +32,7 @@ class Repository: Mappable {
     let language: String?
     let name: String
     let fullName: String
-    
+
     required init(map: Mapper) throws {
         try identifier = map.from("id")
         try name = map.from("name")

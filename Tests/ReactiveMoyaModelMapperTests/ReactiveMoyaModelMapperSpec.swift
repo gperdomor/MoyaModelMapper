@@ -29,15 +29,16 @@ import Quick
 import Nimble
 import ReactiveMoya
 import ReactiveMoyaModelMapper
+import Moya
 
 class ReactiveMoyaModelMapperSpec: QuickSpec {
     let provider = ReactiveSwiftMoyaProvider<GitHub>(stubClosure: ReactiveSwiftMoyaProvider.immediatelyStub)
-    
+
     override func spec() {
         describe("ReactiveMoyaModelMapper") {
             it("can mapped to array of objects") {
                 var repos: [Repository]!
-                
+
                 waitUntil { done in
                     self.provider
                         .request(GitHub.repos(username: "gperdomor", keyPath: false))
@@ -52,7 +53,7 @@ class ReactiveMoyaModelMapperSpec: QuickSpec {
                             }
                     }
                 }
-                
+
                 expect(repos).toNot(beNil())
                 expect(repos.count).to(equal(1))
                 expect(repos[0].identifier).to(equal(1))
@@ -60,10 +61,10 @@ class ReactiveMoyaModelMapperSpec: QuickSpec {
                 expect(repos[0].fullName).to(equal("gperdomor/sygnaler"))
                 expect(repos[0].language).to(equal("Swift"))
             }
-            
+
             it("can mapped to array of objects with key path") {
                 var repos: [Repository]!
-                
+
                 waitUntil { done in
                     self.provider
                         .request(GitHub.repos(username: "gperdomor", keyPath: true))
@@ -78,7 +79,7 @@ class ReactiveMoyaModelMapperSpec: QuickSpec {
                             }
                     }
                 }
-                
+
                 expect(repos).toNot(beNil())
                 expect(repos.count).to(equal(1))
                 expect(repos[0].identifier).to(equal(1))
@@ -86,10 +87,10 @@ class ReactiveMoyaModelMapperSpec: QuickSpec {
                 expect(repos[0].fullName).to(equal("gperdomor/sygnaler"))
                 expect(repos[0].language).to(equal("Swift"))
             }
-            
+
             it("can mapped to objects") {
                 var repo: Repository!
-                
+
                 waitUntil { done in
                     self.provider
                         .request(GitHub.repo(fullName: "gperdomor/sygnaler", keyPath: false))
@@ -104,16 +105,16 @@ class ReactiveMoyaModelMapperSpec: QuickSpec {
                             }
                     }
                 }
-                
+
                 expect(repo.identifier).to(equal(1))
                 expect(repo.name).to(equal("sygnaler"))
                 expect(repo.fullName).to(equal("gperdomor/sygnaler"))
                 expect(repo.language).to(equal("Swift"))
             }
-            
+
             it("can mapped to objects") {
                 var repo: Repository!
-                
+
                 waitUntil { done in
                     self.provider
                         .request(GitHub.repo(fullName: "gperdomor/sygnaler", keyPath: true))
@@ -128,16 +129,17 @@ class ReactiveMoyaModelMapperSpec: QuickSpec {
                             }
                     }
                 }
-                
+
                 expect(repo.identifier).to(equal(1))
                 expect(repo.name).to(equal("sygnaler"))
                 expect(repo.fullName).to(equal("gperdomor/sygnaler"))
                 expect(repo.language).to(equal("Swift"))
             }
-            
+
             it("can throws error if keyPath not exists") {
                 var repo: Repository!
-                
+                var _error: MoyaError!
+
                 waitUntil { done in
                     self.provider
                         .request(GitHub.repo(fullName: "gperdomor/sygnaler", keyPath: true))
@@ -147,22 +149,21 @@ class ReactiveMoyaModelMapperSpec: QuickSpec {
                             case .value(let object):
                                 repo = object
                             case .failed(let error):
-                                expect(true).to(beTrue())
-                                done()
-                            case .completed:
+                                _error = error
                                 done()
                             default: break
                             }
                     }
                 }
-                
+
                 expect(repo).to(beNil())
+                expect(_error).toNot(beNil())
             }
-            
+
             it("can map optionals") {
                 var repo: Repository!
                 var repos: [Repository]!
-                
+
                 waitUntil { done in
                     self.provider
                         .request(GitHub.repo(fullName: "gperdomor/sygnaler", keyPath: true))
@@ -171,19 +172,15 @@ class ReactiveMoyaModelMapperSpec: QuickSpec {
                             switch event {
                             case .value(let object):
                                 repo = object
-                            case .failed(let error):
-                                expect(true).to(beFalse())
                             case .completed:
                                 done()
                             default: break
                             }
                     }
                 }
-                
-                print("EXPECT 1")
 
                 expect(repo).to(beNil())
-                
+
                 waitUntil { done in
                     self.provider
                         .request(GitHub.repos(username: "gperdomor", keyPath: true))
@@ -192,15 +189,13 @@ class ReactiveMoyaModelMapperSpec: QuickSpec {
                             switch event {
                             case .value(let objects):
                                 repos = objects
-                            case .failed(let error):
-                                expect(true).to(beFalse())
                             case .completed:
                                 done()
                             default: break
                             }
                     }
                 }
-                
+
                 expect(repos).to(beNil())
             }
         }
