@@ -14,17 +14,17 @@
 ## CocoaPods
 Use the following entry in your Podfile
 ```
-pod 'MoyaModelMapper', '1.0.1'
+pod 'MoyaModelMapper', '1.0.2'
 ```
 
 The subspec if you want to use the bindings over RxSwift.
 ```
-pod 'MoyaModelMapper/RxSwift', '1.0.1'
+pod 'MoyaModelMapper/RxSwift', '1.0.2'
 ```
 
 And the subspec if you want to use the bindings over ReactiveSwift.
 ```
-pod 'MoyaModelMapper/ReactiveSwift', '1.0.1'
+pod 'MoyaModelMapper/ReactiveSwift', '1.0.2'
 ```
 
 # Usage
@@ -168,6 +168,10 @@ provider
 ## Sample Project
 
 There's a sample project in the Demo directory. To use it, run `pod install` to download the required libraries. Have fun!
+
+## Other Mappers
+ - [MoyaObjectMapper](https://github.com/gperdomor/MoyaObjectMapper): ObjectMapper bindings for Moya
+ - [MoyaUnbox](https://github.com/gperdomor/MoyaUnbox): Unbox bindings for Moya
 
 ## Contributing
 
