@@ -60,16 +60,31 @@ extension GitHub: TargetType {
 
     var sampleData: Data {
         switch self {
-        case .repos(_, let keyPath):
-            if keyPath {
-                return "{\"data\": [{\"id\": 1, \"name\": \"sygnaler\", \"full_name\": \"gperdomor/sygnaler\", \"language\": \"Swift\"}]}".data(using: .utf8)!
+        case .repos(let name, let keyPath):
+            var response: String = "{}"
+
+            if name == "gperdomor" {
+                response = "[{\"id\": 1, \"name\": \"sygnaler\", \"full_name\": \"gperdomor/sygnaler\", \"language\": \"Swift\"}]"
             }
-            return "[{\"id\": 1, \"name\": \"sygnaler\", \"full_name\": \"gperdomor/sygnaler\", \"language\": \"Swift\"}]".data(using: .utf8)!
-        case .repo(_, let keyPath):
+
             if keyPath {
-                return "{\"data\": {\"id\": 1, \"name\": \"sygnaler\", \"full_name\": \"gperdomor/sygnaler\", \"language\": \"Swift\"}}".data(using: .utf8)!
+                response = "{\"data\": \(response)}"
             }
-            return "{\"id\": 1, \"name\": \"sygnaler\", \"full_name\": \"gperdomor/sygnaler\", \"language\": \"Swift\"}".data(using: .utf8)!
+
+            return response.data(using: .utf8)!
+
+        case .repo(let name, let keyPath):
+            var response: String = "{}"
+
+            if name == "gperdomor/sygnaler" {
+                response = "{\"id\": 1, \"name\": \"sygnaler\", \"full_name\": \"gperdomor/sygnaler\", \"language\": \"Swift\"}"
+            }
+
+            if keyPath {
+                response = "{\"data\": \(response)}"
+            }
+
+            return response.data(using: .utf8)!
         }
     }
 

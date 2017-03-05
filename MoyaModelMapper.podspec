@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "MoyaModelMapper"
-  s.version      = "1.0.1"
+  s.version      = "1.0.2"
   s.summary      = "ModelMapper bindings for Moya. Includes RxSwift and ReactiveSwift bindings as well."
   s.description  = <<-DESC
     [ModelMapper](https://github.com/lyft/mapper) bindings for
