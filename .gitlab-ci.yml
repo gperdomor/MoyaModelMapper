@@ -3,6 +3,7 @@
 
 variables:
   XCODE_PROJECT: MoyaModelMapper.xcodeproj
+  BASE_SCHEME: MoyaModelMapper
   GIT_STRATEGY: fetch
 
 ############################################
@@ -11,8 +12,8 @@ variables:
 stages:
   - moya
   - reactive
+  - demo
   - podlint
-  - after_success
 
 ############################################
 # JOBS
@@ -32,13 +33,6 @@ before_script:
       gem install xcpretty;
     fi
 
-  - if ! gem list danger -i > /dev/null 2>&1; then
-      gem install danger;
-    fi
-
-  - if ! gem list danger-swiftlint -i > /dev/null 2>&1; then
-      gem install danger-swiftlint;
-    fi
   # bootstrap the dependencies for the project
   # you can remove if you don't have dependencies
   - PLATFORM=$PLATFORM ./scripts/bootstrap-if-needed
@@ -53,64 +47,49 @@ after_script:
   paths:
   - Carthage
 
-.script_template: &script_definition
+.script_template: &script
   script:
     - set -o pipefail
-    - xcodebuild -version
-    - xcodebuild -showsdks
 
     - SCHEME="$PREFIX$BASE_SCHEME"
-
-    - xcodebuild clean -project "$XCODE_PROJECT" -scheme "$SCHEME" | xcpretty
-
+    
     # Build Framework in Debug and Run Tests if specified
-    - echo "BUILD FOR DEBUG"
-    - if [ $RUN_TESTS == "YES" ]; then
-        xcodebuild -project "$XCODE_PROJECT" -scheme "$SCHEME" -sdk "$SDK" -destination "$DESTINATION" -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES test | xcpretty;
-      else
-        xcodebuild -project "$XCODE_PROJECT" -scheme "$SCHEME" -sdk "$SDK" -destination "$DESTINATION" -configuration Debug ONLY_ACTIVE_ARCH=NO build | xcpretty;
-      fi
-
     - xcodebuild clean -project "$XCODE_PROJECT" -scheme "$SCHEME" | xcpretty
+    - xcodebuild -project "$XCODE_PROJECT" -scheme "$SCHEME" -sdk "$SDK" -destination "$DESTINATION" -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES $ACTION | xcpretty;
 
     # Build Framework in Release and Run Tests if specified
-    - echo "BUILD FOR RELEASE"
-    - if [ $RUN_TESTS == "YES" ]; then
-        xcodebuild -project "$XCODE_PROJECT" -scheme "$SCHEME" -sdk "$SDK" -destination "$DESTINATION" -configuration Release ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES test | xcpretty;
-      else
-        xcodebuild -project "$XCODE_PROJECT" -scheme "$SCHEME" -sdk "$SDK" -destination "$DESTINATION" -configuration Release ONLY_ACTIVE_ARCH=NO build | xcpretty;
-      fi
+    - xcodebuild clean -project "$XCODE_PROJECT" -scheme "$SCHEME" | xcpretty
+    - xcodebuild -project "$XCODE_PROJECT" -scheme "$SCHEME" -sdk "$SDK" -destination "$DESTINATION" -configuration Release ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES $ACTION | xcpretty;
 
 .iOS_vars: &iOS_vars
   PLATFORM: iOS
-  BASE_SCHEME: MoyaModelMapper-iOS
-  SDK: iphonesimulator10.2
-  RUN_TESTS: "YES"
+  SDK: iphonesimulator10.3
+  ACTION: test
+  DESTINATION: "platform=iOS Simulator,OS=10.3,name=iPhone 7"
 
 .macOS_vars: &macOS_vars
   PLATFORM: macOS
-  BASE_SCHEME: MoyaModelMapper-macOS
   SDK: macosx10.12
-  RUN_TESTS: "YES"
+  ACTION: test
   DESTINATION: "platform=OS X,arch=x86_64"
 
 .tvOS_vars: &tvOS_vars
   PLATFORM: tvOS
-  BASE_SCHEME: MoyaModelMapper-tvOS
-  SDK: appletvsimulator10.1
-  RUN_TESTS: "YES"
+  SDK: appletvsimulator10.2
+  ACTION: test
+  DESTINATION: "OS=10.2,name=Apple TV 1080p"
 
 .watchOS_vars: &watchOS_vars
   PLATFORM: watchOS
-  BASE_SCHEME: MoyaModelMapper-watchOS
-  SDK: watchsimulator3.1
-  RUN_TESTS: "NO"
+  SDK: watchsimulator3.2
+  ACTION: build
+  DESTINATION: "platform=watchOS Simulator,OS=3.2,name=Apple Watch Series 2 - 42mm"
 
 ############################################
 # JOBS - STAGE: TEST
 
 # iPhone 7
-iPhone 7 - OS 10.2:
+iPhone 7 - OS 10.3:
   stage: moya
   cache:
     <<: *cache_paths
@@ -118,12 +97,11 @@ iPhone 7 - OS 10.2:
   tags:
     - xcode
     - iOS
-  <<: *script_definition
+  <<: *script
   variables:
     <<: *iOS_vars
-    DESTINATION: "platform=iOS Simulator,OS=10.2,name=iPhone 7"
 
-Rx iPhone 7 - OS 10.2:
+Rx iPhone 7 - OS 10.3:
   stage: reactive
   cache:
     <<: *cache_paths
@@ -131,13 +109,12 @@ Rx iPhone 7 - OS 10.2:
   tags:
     - xcode
     - iOS
-  <<: *script_definition
+  <<: *script
   variables:
     <<: *iOS_vars
     PREFIX: Rx
-    DESTINATION: "platform=iOS Simulator,OS=10.2,name=iPhone 7"
 
-Reactive iPhone 7 - OS 10.2:
+Reactive iPhone 7 - OS 10.3:
   stage: reactive
   cache:
     <<: *cache_paths
@@ -145,11 +122,10 @@ Reactive iPhone 7 - OS 10.2:
   tags:
     - xcode
     - iOS
-  <<: *script_definition
+  <<: *script
   variables:
     <<: *iOS_vars
     PREFIX: Reactive
-    DESTINATION: "platform=iOS Simulator,OS=10.2,name=iPhone 7"
 
 # macOS
 macOS - OS 10.12:
@@ -160,7 +136,7 @@ macOS - OS 10.12:
   tags:
     - xcode
     - macOS
-  <<: *script_definition
+  <<: *script
   variables:
     <<: *macOS_vars
 
@@ -172,7 +148,7 @@ Rx macOS - OS 10.12:
   tags:
     - xcode
     - macOS
-  <<: *script_definition
+  <<: *script
   variables:
     <<: *macOS_vars 
     PREFIX: Rx
@@ -185,13 +161,13 @@ Reactive macOS - OS 10.12:
   tags:
     - xcode
     - macOS
-  <<: *script_definition
+  <<: *script
   variables:
     <<: *macOS_vars
     PREFIX: Reactive
 
 # tvOS
-Apple TV 1080p - OS 10.1:
+Apple TV 1080p - OS 10.2:
   stage: moya
   cache:
     <<: *cache_paths
@@ -199,12 +175,11 @@ Apple TV 1080p - OS 10.1:
   tags:
     - xcode
     - tvOS
-  <<: *script_definition
+  <<: *script
   variables:
     <<: *tvOS_vars
-    DESTINATION: "OS=10.1,name=Apple TV 1080p"
 
-Rx Apple TV 1080p - OS 10.1:
+Rx Apple TV 1080p - OS 10.2:
   stage: reactive
   cache:
     <<: *cache_paths
@@ -212,13 +187,12 @@ Rx Apple TV 1080p - OS 10.1:
   tags:
     - xcode
     - tvOS
-  <<: *script_definition
+  <<: *script
   variables:
     <<: *tvOS_vars
     PREFIX: Rx
-    DESTINATION: "OS=10.1,name=Apple TV 1080p"
 
-Reactive Apple TV 1080p - OS 10.1:
+Reactive Apple TV 1080p - OS 10.2:
   stage: reactive
   cache:
     <<: *cache_paths
@@ -226,56 +200,67 @@ Reactive Apple TV 1080p - OS 10.1:
   tags:
     - xcode
     - tvOS
-  <<: *script_definition
+  <<: *script
   variables:
     <<: *tvOS_vars
     PREFIX: Reactive
-    DESTINATION: "OS=10.1,name=Apple TV 1080p"
 
 # watchOS
 Apple Watch Series 2 - OS 3.1:
   stage: moya
-  allow_failure: true
   cache:
     <<: *cache_paths
     key: watchOS
   tags:
     - xcode
     - watchOS
-  <<: *script_definition
+  <<: *script
   variables:
     <<: *watchOS_vars
-    DESTINATION: "platform=watchOS Simulator,OS=3.1,name=Apple Watch Series 2 - 42mm"
 
 Rx Apple Watch Series 2 - OS 3.1:
   stage: reactive
-  allow_failure: true
   cache:
     <<: *cache_paths
     key: watchOS
   tags:
     - xcode
     - watchOS
-  <<: *script_definition
+  <<: *script
   variables:
     <<: *watchOS_vars
     PREFIX: Rx
-    DESTINATION: "platform=watchOS Simulator,OS=3.1,name=Apple Watch Series 2 - 42mm"
 
 Reactive Apple Watch Series 2 - OS 3.1:
   stage: reactive
-  allow_failure: true
   cache:
     <<: *cache_paths
     key: watchOS
   tags:
     - xcode
     - watchOS
-  <<: *script_definition
+  <<: *script
   variables:
     <<: *watchOS_vars
     PREFIX: Reactive
-    DESTINATION: "platform=watchOS Simulator,OS=3.1,name=Apple Watch Series 2 - 42mm"
+
+############################################
+# JOBS - STAGE: Demo
+
+demo:
+  stage: demo
+  when: on_success
+  tags:
+    - xcode
+    - iOS
+  variables:
+    <<: *iOS_vars
+  before_script:
+    - echo "Demo"
+  script:
+    - cd Demo
+    - pod install
+    - xcodebuild -workspace "Demo.xcworkspace" -scheme "Demo" -sdk "$SDK" -destination "$DESTINATION" -configuration Debug ONLY_ACTIVE_ARCH=NO build | xcpretty;
 
 ############################################
 # JOBS - STAGE: PODLINT
@@ -289,22 +274,3 @@ podlint:
     - echo "Podlint"
   script:
     - pod lib lint --allow-warnings
-
-############################################
-# JOBS - STAGE: AFTER SUCCESS
-
-danger:
-  stage: after_success
-  when: on_success
-  tags:
-    - xcode
-  before_script:
-    - echo "Danger"
-  script:
-    - danger
-
-#codecov:
-#  stage: after_success
-#  when: on_success
-#  script:
-#    - bash <(curl -s https://codecov.io/bash)
