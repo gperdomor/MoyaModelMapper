@@ -1,11 +1,44 @@
-opt_in_rules:
-  - empty_count
-  - force_unwrapping
-
 included:
   - Sources
   - Tests
-  - Demo
+  - Demo/Demo
+
+excluded:
+  - Carthage
+  - Config
+
+disabled_rules:
+  - line_length
+
+opt_in_rules:
+  - empty_count
+  - force_unwrapping
+  - file_header
+
+type_body_length:
+  warning: 300
+  error: 400
+
+file_length:
+  warning: 500
+  error: 1200
 
 function_body_length:
   warning: 50
+
+identifier_name:
+  min_length: # only min_length
+    error: 3 # only error
+  excluded: # excluded via string array
+    - id
+    
+file_header:
+  required_pattern: |
+                    \/\/
+                    \/\/  .*?\.swift
+                    \/\/  SwifterCode
+                    \/\/
+                    \/\/  Created by .*? on \d{1,2}\/\d{1,2}\/\d{2}\.
+                    \/\/  Copyright © \d{4} SwifterCode\. All rights reserved\.
+
+reporter: "emoji"

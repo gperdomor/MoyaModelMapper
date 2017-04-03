@@ -16,7 +16,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6583CA131E5A27F500DE8528"
                BuildableName = "RxMoyaModelMapper.framework"
-               BlueprintName = "RxMoyaModelMapper-macOS"
+               BlueprintName = "RxMoyaModelMapper"
                ReferencedContainer = "container:MoyaModelMapper.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -29,8 +29,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6583CA231E5A2C8700DE8528"
-               BuildableName = "RxMoyaModelMapper-macOS Tests.xctest"
-               BlueprintName = "RxMoyaModelMapper-macOS Tests"
+               BuildableName = "RxMoyaModelMapper-Tests.xctest"
+               BlueprintName = "RxMoyaModelMapper-Tests"
                ReferencedContainer = "container:MoyaModelMapper.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -48,8 +48,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6583CA231E5A2C8700DE8528"
-               BuildableName = "RxMoyaModelMapper-macOS Tests.xctest"
-               BlueprintName = "RxMoyaModelMapper-macOS Tests"
+               BuildableName = "RxMoyaModelMapper-Tests.xctest"
+               BlueprintName = "RxMoyaModelMapper-Tests"
                ReferencedContainer = "container:MoyaModelMapper.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -59,7 +59,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6583CA131E5A27F500DE8528"
             BuildableName = "RxMoyaModelMapper.framework"
-            BlueprintName = "RxMoyaModelMapper-macOS"
+            BlueprintName = "RxMoyaModelMapper"
             ReferencedContainer = "container:MoyaModelMapper.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -81,7 +81,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6583CA131E5A27F500DE8528"
             BuildableName = "RxMoyaModelMapper.framework"
-            BlueprintName = "RxMoyaModelMapper-macOS"
+            BlueprintName = "RxMoyaModelMapper"
             ReferencedContainer = "container:MoyaModelMapper.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -99,7 +99,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6583CA131E5A27F500DE8528"
             BuildableName = "RxMoyaModelMapper.framework"
-            BlueprintName = "RxMoyaModelMapper-macOS"
+            BlueprintName = "RxMoyaModelMapper"
             ReferencedContainer = "container:MoyaModelMapper.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

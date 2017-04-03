@@ -1,6 +1,8 @@
 language: objective-c
 os: osx
-osx_image: xcode8.2
+osx_image: xcode8.3
+
+rvm: 2.2.0
 
 cache:
   cocoapods: true
@@ -15,27 +17,15 @@ xcode_scheme:
   - ReactiveMoyaModelMapper
 
 env:
-  - CACHE_NAME=iOS       PLATFORM=iOS
-  - CACHE_NAME=macOS     PLATFORM=macOS
-  - CACHE_NAME=tvOS      PLATFORM=tvOS
-  - CACHE_NAME=watchOS   PLATFORM=watchOS
-
-matrix:
-  allow_failures:
-  - xcode_project: MoyaModelMapper.xcodeproj
-    xcode_scheme: MoyaModelMapper
-    env: CACHE_NAME=watchOS   PLATFORM=watchOS
-  - xcode_project: MoyaModelMapper.xcodeproj
-    xcode_scheme: RxMoyaModelMapper
-    env: CACHE_NAME=watchOS   PLATFORM=watchOS
-  - xcode_project: MoyaModelMapper.xcodeproj
-    xcode_scheme: ReactiveMoyaModelMapper
-    env: CACHE_NAME=watchOS   PLATFORM=watchOS
+  - CACHE_NAME=iOS        PLATFORM=iOS        ACTION=test    POD_LINT="YES"
+  - CACHE_NAME=macOS      PLATFORM=macOS      ACTION=test
+  - CACHE_NAME=tvOS       PLATFORM=tvOS       ACTION=test
+  - CACHE_NAME=watchOS    PLATFORM=watchOS    ACTION=build
 
 before_install:
   - brew update
   # Cocoapod
-  - brew outdated cocoapods || brew upgrade cocoapods
+  - brew install cocoapods
   # SwiftLint
   - brew outdated swiftlint || brew upgrade swiftlint
   # Carthage tools
@@ -48,73 +38,52 @@ before_install:
   - gem install danger danger-swiftlint
 
 before_script:
-  - export RUN_TESTS="YES"
   - export POD_LINT="NO"
-  - export SCHEME="${TRAVIS_XCODE_SCHEME}-${PLATFORM}"
 
-  - case "${PLATFORM}" in
+  - case "$PLATFORM" in
       "iOS")
-        export SDK="iphonesimulator10.2";
-        export DESTINATION="platform=iOS Simulator,OS=10.1,name=iPhone 7";
+        export SDK="iphonesimulator10.3";
+        export DESTINATION="platform=iOS Simulator,OS=10.3,name=iPhone 7";
         ;;
       "macOS")
         export SDK="macosx10.12";
         export DESTINATION="platform=OS X,arch=x86_64";
         ;;
       "tvOS")
-        export SDK="appletvsimulator10.1";
-        export DESTINATION="OS=10.0,name=Apple TV 1080p";
+        export SDK="appletvsimulator10.2";
+        export DESTINATION="OS=10.2,name=Apple TV 1080p";
         ;;
       "watchOS")
-        export SDK="watchsimulator3.1";
-        export DESTINATION="platform=watchOS Simulator,OS=3.1,name=Apple Watch Series 2 - 42mm";
-        export RUN_TESTS="NO";
+        export SDK="watchsimulator3.2";
+        export DESTINATION="platform=watchOS Simulator,OS=3.2,name=Apple Watch Series 2 - 42mm";
         ;;
     esac
 
-  - if [ ${SCHEME} == "MoyaModelMapper-iOS" ]; then
-      export POD_LINT="YES";
-    fi
-
   # bootstrap the dependencies for the project
   # you can remove if you don't have dependencies
-  - PLATFORM=${PLATFORM} ./scripts/bootstrap-if-needed
+  - PLATFORM=$PLATFORM ./scripts/bootstrap-if-needed
 
 script:
   - set -o pipefail
-  - xcodebuild -version
-  - xcodebuild -showsdks
   
-  - xcodebuild clean -project "${TRAVIS_XCODE_PROJECT}" -scheme "${SCHEME}" | xcpretty
-
   # Build Framework in Debug and Run Tests if specified
-  - echo "BUILD FOR DEBUG"
-  - if [ ${RUN_TESTS} == "YES" ]; then
-      xcodebuild -project "${TRAVIS_XCODE_PROJECT}" -scheme "${SCHEME}" -sdk "${SDK}" -destination "${DESTINATION}" -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES test | xcpretty;
-    else
-      xcodebuild -project "${TRAVIS_XCODE_PROJECT}" -scheme "${SCHEME}" -sdk "${SDK}" -destination "${DESTINATION}" -configuration Debug ONLY_ACTIVE_ARCH=NO build | xcpretty;
-    fi
-
-  - xcodebuild clean -project "$TRAVIS_XCODE_PROJECT" -scheme "$SCHEME" | xcpretty
+  - xcodebuild clean -project "$TRAVIS_XCODE_PROJECT" -scheme "$TRAVIS_XCODE_SCHEME" | xcpretty
+  - xcodebuild -project "$TRAVIS_XCODE_PROJECT" -scheme "$TRAVIS_XCODE_SCHEME" -sdk "$SDK" -destination "$DESTINATION" -configuration Debug ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES $ACTION | xcpretty;
 
   # Build Framework in Release and Run Tests if specified
-  - echo "BUILD FOR RELEASE"
-  - if [ ${RUN_TESTS} == "YES" ]; then
-      xcodebuild -project "${TRAVIS_XCODE_PROJECT}" -scheme "${SCHEME}" -sdk "${SDK}" -destination "${DESTINATION}" -configuration Release ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES test | xcpretty;
-    else
-      xcodebuild -project "${TRAVIS_XCODE_PROJECT}" -scheme "${SCHEME}" -sdk "${SDK}" -destination "${DESTINATION}" -configuration Release ONLY_ACTIVE_ARCH=NO build | xcpretty;
-    fi
+  - xcodebuild clean -project "$TRAVIS_XCODE_PROJECT" -scheme "$TRAVIS_XCODE_SCHEME" | xcpretty
+  - xcodebuild -project "$TRAVIS_XCODE_PROJECT" -scheme "$TRAVIS_XCODE_SCHEME" -sdk "$SDK" -destination "$DESTINATION" -configuration Release ONLY_ACTIVE_ARCH=NO ENABLE_TESTABILITY=YES $ACTION | xcpretty;
 
   # Build Example in Debug if specified
-  - if [ ${SDK} == "iOS" ]; then
+  - if [ $PLATFORM == "iOS" ] && [ $TRAVIS_XCODE_SCHEME == "MoyaModelMapper" ]; then
       cd Demo;
       pod install;
-      xcodebuild -project "Demo.xcworkspace" -scheme "Demo" -sdk "${SDK}" -destination "${DESTINATION}" -configuration Debug ONLY_ACTIVE_ARCH=NO build | xcpretty;
+      xcodebuild -workspace "Demo.xcworkspace" -scheme "Demo" -sdk "$SDK" -destination "$DESTINATION" -configuration Debug ONLY_ACTIVE_ARCH=NO build | xcpretty;
       cd ..;
     fi
 
   # Run `pod lib lint` if specified
-  - if [ $POD_LINT == "YES" ] && [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+  - if [ $POD_LINT == "YES" ] && [ $TRAVIS_XCODE_SCHEME == "MoyaModelMapper" ] && [ $TRAVIS_PULL_REQUEST != "false" ]; then
       pod repo update > /dev/null;
       travis_wait 60 pod lib lint --allow-warnings;
     fi
